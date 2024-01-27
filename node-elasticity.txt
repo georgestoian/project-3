@@ -1,0 +1,93 @@
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # module.project_eks.aws_eks_node_group.node will be updated in-place
+  ~ resource "aws_eks_node_group" "node" {
+        id              = "udacity-cluster:app-udacity-node-group"
+        tags            = {
+            "Name" = "eks-udacity-nodes"
+        }
+        # (15 unchanged attributes hidden)
+
+      ~ scaling_config {
+          ~ desired_size = 2 -> 3
+          ~ max_size     = 2 -> 3
+            # (1 unchanged attribute hidden)
+        }
+
+        # (1 unchanged block hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+╷
+│ Warning: Argument is deprecated
+│ 
+│   with module.vpc.aws_eip.nat,
+│   on modules/vpc/routes.tf line 54, in resource "aws_eip" "nat":
+│   54:   vpc = true
+│ 
+│ use domain attribute instead
+│ 
+│ (and one more similar warning elsewhere)
+╵
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.project_eks.aws_eks_node_group.node: Modifying... [id=udacity-cluster:app-udacity-node-group]
+module.project_eks.aws_eks_node_group.node: Still modifying... [id=udacity-cluster:app-udacity-node-group, 10s elapsed]
+module.project_eks.aws_eks_node_group.node: Still modifying... [id=udacity-cluster:app-udacity-node-group, 20s elapsed]
+module.project_eks.aws_eks_node_group.node: Still modifying... [id=udacity-cluster:app-udacity-node-group, 30s elapsed]
+module.project_eks.aws_eks_node_group.node: Still modifying... [id=udacity-cluster:app-udacity-node-group, 40s elapsed]
+module.project_eks.aws_eks_node_group.node: Still modifying... [id=udacity-cluster:app-udacity-node-group, 50s elapsed]
+module.project_eks.aws_eks_node_group.node: Still modifying... [id=udacity-cluster:app-udacity-node-group, 1m0s elapsed]
+module.project_eks.aws_eks_node_group.node: Modifications complete after 1m7s [id=udacity-cluster:app-udacity-node-group]
+
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.
+
+Outputs:
+
+account_id = "430510745043"
+caller_arn = "arn:aws:iam::430510745043:user/admin"
+caller_user = "AIDAWIPDQUXJQFVZ4BKN7"
+E1131910:infra stoiang$ kubectl get nodes
+NAME                                         STATUS     ROLES    AGE   VERSION
+ip-10-100-1-221.us-east-2.compute.internal   NotReady   <none>   11s   v1.23.17-eks-5e0fdde
+ip-10-100-2-80.us-east-2.compute.internal    Ready      <none>   39m   v1.23.17-eks-5e0fdde
+ip-10-100-3-194.us-east-2.compute.internal   Ready      <none>   37m   v1.23.17-eks-5e0fdde
+E1131910:infra stoiang$ kubectl get pods
+NAME                                  READY   STATUS    RESTARTS   AGE
+bloaty-mcbloatface-56bfff44df-5hd4b   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-6qf4f   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-9sf54   1/1     Running   0          4m15s
+bloaty-mcbloatface-56bfff44df-cbccr   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-f9kkc   1/1     Running   0          4m15s
+bloaty-mcbloatface-56bfff44df-glzrm   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-gm6sc   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-hbhj5   1/1     Running   0          4m15s
+bloaty-mcbloatface-56bfff44df-j4hqb   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-ktdcz   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-nrkvz   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-v8h5f   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-xqgz7   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-z864f   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-zngsh   1/1     Running   0          4m16s
+bloaty-mcbloatface-56bfff44df-znv8l   1/1     Running   0          4m15s
+bloaty-mcbloatface-56bfff44df-zqs8q   1/1     Running   0          4m16s
+canary-v1-84676f5bb7-6896l            1/1     Running   0          38m
+canary-v1-84676f5bb7-9f4h9            1/1     Running   0          40m
+canary-v1-84676f5bb7-s9jvg            1/1     Running   0          40m
+canary-v2-7b4d74dcb9-8c5dz            1/1     Running   0          40m
+canary-v2-7b4d74dcb9-csdxg            1/1     Running   0          38m
+canary-v2-7b4d74dcb9-w4g6k            1/1     Running   0          40m
+green-6cf5bfcb78-27pgg                1/1     Running   0          36m
+green-6cf5bfcb78-68nxx                1/1     Running   0          36m
+green-6cf5bfcb78-pfp4s                1/1     Running   0          36m
+hello-world-c57f59b87-lcv4v           1/1     Running   0          40m

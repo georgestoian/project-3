@@ -13,10 +13,10 @@
 #     fi
 # }
 
-function canary_deploy {
-  NUM_OF_V1_PODS=$(kubectl get pods -n udacity | grep -c canary-v1)
-  echo "V1 PODS: $NUM_OF_V1_PODS"
-  NUM_OF_V2_PODS=$(kubectl get pods -n udacity | grep -c canary-v2)
+function green_deploy {
+  NUM_OF_BLUE_PODS=$(kubectl get pods -n udacity | grep -c blue)
+  echo "BLUE PODS: $NUM_OF_V1_PODS"
+  NUM_OF_V2_PODS=$(kubectl get pods -n udacity | grep -c green)
   echo "V2 PODS: $NUM_OF_V2_PODS"
 
   kubectl scale deployment canary-v2 --replicas=3 #$((NUM_OF_V2_PODS + $DEPLOY_INCREMENTS))

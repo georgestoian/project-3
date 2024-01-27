@@ -1,0 +1,54 @@
+root@hello-world-c57f59b87-jnnrj:/app# for i in {0..10}; do curl canary-svc.udacity.svc.cluster.local; done
+<html>
+<h1>This is version 1</h1>
+</html>
+<html>
+<h1>This is version 2</h1>
+</html>
+<html>
+<h1>This is version 1</h1>
+</html>
+<html>
+<h1>This is version 1</h1>
+</html>
+<html>
+<h1>This is version 1</h1>
+</html>
+<html>
+<h1>This is version 2</h1>
+</html>
+<html>
+<h1>This is version 2</h1>
+</html>
+<html>
+<h1>This is version 2</h1>
+</html>
+<html>
+<h1>This is version 2</h1>
+</html>
+<html>
+<h1>This is version 1</h1>
+</html>
+<html>
+<h1>This is version 2</h1>
+</html>
+root@hello-world-c57f59b87-jnnrj:/app# exit
+exit
+E1131910:nd087-c3-deployment-roulette stoiang$ kubectl get pods -A
+NAMESPACE     NAME                          READY   STATUS    RESTARTS   AGE
+kube-system   aws-node-c8n6c                2/2     Running   0          106m
+kube-system   aws-node-k69nx                2/2     Running   0          106m
+kube-system   coredns-54f6fdf5d7-rm8t2      1/1     Running   0          108m
+kube-system   coredns-54f6fdf5d7-z9plt      1/1     Running   0          108m
+kube-system   kube-proxy-rjzxx              1/1     Running   0          106m
+kube-system   kube-proxy-vq8b5              1/1     Running   0          106m
+udacity       blue-6b6b7cf74d-5j7c4         1/1     Running   0          103m
+udacity       blue-6b6b7cf74d-pbv5j         1/1     Running   0          103m
+udacity       blue-6b6b7cf74d-rdx7m         1/1     Running   0          103m
+udacity       canary-v1-84676f5bb7-h9h46    1/1     Running   0          103m
+udacity       canary-v1-84676f5bb7-tpgff    1/1     Running   0          103m
+udacity       canary-v1-84676f5bb7-zj2gl    1/1     Running   0          103m
+udacity       canary-v2-7b4d74dcb9-2bmrd    1/1     Running   0          9m51s
+udacity       canary-v2-7b4d74dcb9-j4krb    1/1     Running   0          12m
+udacity       canary-v2-7b4d74dcb9-vnc9r    1/1     Running   0          9m51s
+udacity       hello-world-c57f59b87-jnnrj   1/1     Running   0          98m
