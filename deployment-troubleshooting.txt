@@ -1,0 +1,146 @@
+1. Pod was restarting.
+
+E1131910:nd087-c3-deployment-roulette stoiang$ kubectl get pods
+NAME                           READY   STATUS    RESTARTS      AGE
+blue-6b6b7cf74d-5j7c4          1/1     Running   0             91s
+blue-6b6b7cf74d-pbv5j          1/1     Running   0             91s
+blue-6b6b7cf74d-rdx7m          1/1     Running   0             91s
+canary-v1-84676f5bb7-h9h46     1/1     Running   0             93s
+canary-v1-84676f5bb7-tpgff     1/1     Running   0             93s
+canary-v1-84676f5bb7-zj2gl     1/1     Running   0             93s
+hello-world-65f7f9656b-tbsfz   1/1     Running   1 (31s ago)   97s
+
+2. Tried to check the events for this pod with the "kubectl describe pod" command.
+E1131910:nd087-c3-deployment-roulette stoiang$ kubectl describe pod hello-world-65f7f9656b-tbsfz 
+Name:             hello-world-65f7f9656b-tbsfz
+Namespace:        udacity
+Priority:         0
+Service Account:  default
+Node:             ip-10-100-2-34.us-east-2.compute.internal/10.100.2.34
+Start Time:       Sat, 27 Jan 2024 16:01:29 +0200
+Labels:           app=hello-world
+                  pod-template-hash=65f7f9656b
+Annotations:      kubernetes.io/psp: eks.privileged
+Status:           Running
+IP:               10.100.2.160
+IPs:
+  IP:           10.100.2.160
+Controlled By:  ReplicaSet/hello-world-65f7f9656b
+Containers:
+  hello-world:
+    Container ID:   docker://d222119b34789510da09efc0a1f772092fe82623ac33708073f34c4d4e3c70c9
+    Image:          etapau/hello-world:udacity
+    Image ID:       docker-pullable://etapau/hello-world@sha256:b158d96c3f9ff8311acbff1c16b38ee39acf4c68a8ca0b3ea25d7064d24ef0bd
+    Port:           9000/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sat, 27 Jan 2024 16:03:14 +0200
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    137
+      Started:      Sat, 27 Jan 2024 16:02:36 +0200
+      Finished:     Sat, 27 Jan 2024 16:03:13 +0200
+    Ready:          True
+    Restart Count:  2
+    Liveness:       http-get http://:9000/nginx_status delay=2s timeout=1s period=2s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-9sljh (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  kube-api-access-9sljh:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              kubernetes.io/os=linux
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  109s               default-scheduler  Successfully assigned udacity/hello-world-65f7f9656b-tbsfz to ip-10-100-2-34.us-east-2.compute.internal
+  Normal   Pulled     81s                kubelet            Successfully pulled image "etapau/hello-world:udacity" in 27.358384763s (27.358392242s including waiting)
+  Normal   Pulled     42s                kubelet            Successfully pulled image "etapau/hello-world:udacity" in 292.685669ms (292.693223ms including waiting)
+  Normal   Killing    35s (x2 over 73s)  kubelet            Container hello-world failed liveness probe, will be restarted
+  Normal   Pulling    5s (x3 over 108s)  kubelet            Pulling image "etapau/hello-world:udacity"
+  Normal   Created    4s (x3 over 79s)   kubelet            Created container hello-world
+  Normal   Started    4s (x3 over 79s)   kubelet            Started container hello-world
+  Normal   Pulled     4s                 kubelet            Successfully pulled image "etapau/hello-world:udacity" in 243.282486ms (243.305753ms including waiting)
+  Warning  Unhealthy  1s (x7 over 77s)   kubelet            Liveness probe failed: HTTP probe failed with statuscode: 500
+
+3. Identified there was an issue with the liveness probe. From the previous command output, I noticed that the liveness probe was configured to interogate the /nginx_status endpoint. I executed a "kubectl logs" command to gather more information from the application logs.
+E1131910:nd087-c3-deployment-roulette stoiang$ kubectl logs hello-world-65f7f9656b-tbsfz
+Ready to receive requests on 9000
+ * Serving Flask app 'main' (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.100.2.160:9000/ (Press CTRL+C to quit)
+Failed health check you want to ping /healthz
+10.100.2.34 - - [27/Jan/2024 14:04:33] "GET /nginx_status HTTP/1.1" 500 -
+
+4. Changed the liveness probe in the apps/hello-world/hello.yml manifest to interrogate the /healthz endpoint and reapplied the yaml file with "./initialize_k8s.sh" script.
+E1131910:nd087-c3-deployment-roulette stoiang$ ./initialize_k8s.sh 
+deployment.apps/hello-world configured
+service/hello-world unchanged
+configmap/canary-config-v1 unchanged
+deployment.apps/canary-v1 unchanged
+deployment.apps/blue unchanged
+configmap/blue-config unchanged
+configmap/green-config unchanged
+
+5. Checked the logs of the pod
+E1131910:nd087-c3-deployment-roulette stoiang$ kubectl logs hello-world-c57f59b87-jnnrj
+Ready to receive requests on 9000
+ * Serving Flask app 'main' (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://10.100.2.141:9000/ (Press CTRL+C to quit)
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:26] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:28] "GET /healthz HTTP/1.1" 200 -
+10.100.2.34 - - [27/Jan/2024 14:06:30] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:32] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:34] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:36] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:38] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:40] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:42] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:44] "GET /healthz HTTP/1.1" 200 -
+Healthy!
+10.100.2.34 - - [27/Jan/2024 14:06:46] "GET /healthz HTTP/1.1" 200 -
+
+6. Pod was not restarting itself anymore.
+E1131910:nd087-c3-deployment-roulette stoiang$ kubectl get pods
+NAME                          READY   STATUS    RESTARTS   AGE
+blue-6b6b7cf74d-5j7c4         1/1     Running   0          11m
+blue-6b6b7cf74d-pbv5j         1/1     Running   0          11m
+blue-6b6b7cf74d-rdx7m         1/1     Running   0          11m
+canary-v1-84676f5bb7-h9h46    1/1     Running   0          11m
+canary-v1-84676f5bb7-tpgff    1/1     Running   0          11m
+canary-v1-84676f5bb7-zj2gl    1/1     Running   0          11m
+hello-world-c57f59b87-jnnrj   1/1     Running   0          6m26s
